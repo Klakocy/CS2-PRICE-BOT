@@ -140,6 +140,18 @@ function Handle-Command {
         }
 
         "track" {
+            # track all -> wlacz wszystkie zapisane
+            if ($parts.Count -eq 2 -and $parts[1].ToLower() -eq "all") {
+                $ctx = $Global:CS2BotContext
+                $res = Start-AllTracking -trackedFile $ctx.TrackedFile
+                if ($res.status -eq "ok") {
+                    Write-Host $res.message
+                } else {
+                    Write-Host ("Error: {0}" -f $res.message)
+                }
+                break
+            }
+
             $parsed = Parse-TrackCommand -parts $parts
 
             if (-not $parsed.ok) {
@@ -174,8 +186,19 @@ function Handle-Command {
                 break
             }
 
-            if ($parts.Count -lt 4) {
-                Write-Host "Usage: stop weapon skin wear"
+            # stop by index, e.g. "stop 2"
+            if ($parts.Count -eq 2) {
+                [int]$idx = 0
+                if ([int]::TryParse($parts[1], [ref]$idx) -and $idx -gt 0) {
+                    $res = Stop-Tracking -weapon "" -skin "" -wear "" -trackedFile $ctx.TrackedFile -Index $idx
+                    if ($res.status -eq "ok") {
+                        Write-Host $res.message
+                    } else {
+                        Write-Host ("Error: {0}" -f $res.message)
+                    }
+                } else {
+                    Write-Host "Usage: stop weapon skin wear  |  stop all  |  stop <index>"
+                }
                 break
             }
 
@@ -217,7 +240,8 @@ function Handle-Command {
             Write-Host "Current trackings:"
             foreach ($t in $list) {
                 $state = if ($t.active) { "ON" } else { "OFF" }
-                Write-Host ("  - {0} | {1} ({2}) every {3}s [{4}]" -f $t.weapon, $t.skin, $t.wear, $t.interval, $state)
+                $idx = if ($t.PSObject.Properties.Match("index").Count -gt 0) { $t.index } else { "-" }
+                Write-Host ("  {0}. {1} | {2} ({3}) every {4}s [{5}]" -f $idx, $t.weapon, $t.skin, $t.wear, $t.interval, $state)
             }
         }
 
@@ -241,6 +265,76 @@ function Handle-Command {
             foreach ($l in $lines) {
                 Write-Host ("  {0}" -f $l)
             }
+        }
+
+        "delete" {
+            $ctx = $Global:CS2BotContext
+            if ($parts.Count -ne 2) {
+                Write-Host "Usage: delete <index>"
+                break
+            }
+            $arg = $parts[1].ToLower()
+            if ($arg -eq "all") {
+                $res = Delete-AllTracking -trackedFile $ctx.TrackedFile
+                if ($res.status -eq "ok") {
+                    Write-Host $res.message
+                    $ans = Read-Host "Also clear history.txt? (y/n)"
+                    if ($ans -and $ans.Trim().ToLower() -in @("y", "yes")) {
+                        "" | Set-Content -Path $ctx.HistoryFile -Encoding UTF8
+                        Write-Host "History cleared."
+                    }
+                } else {
+                    Write-Host ("Error: {0}" -f $res.message)
+                }
+            } else {
+                [int]$delIdx = 0
+                if (-not [int]::TryParse($parts[1], [ref]$delIdx)) {
+                    Write-Host "Usage: delete <index>"
+                    break
+                }
+                $res = Delete-Tracking -Index $delIdx -trackedFile $ctx.TrackedFile
+                if ($res.status -eq "ok") {
+                    Write-Host $res.message
+                } else {
+                    Write-Host ("Error: {0}" -f $res.message)
+                }
+            }
+            break
+        }
+
+        "del" {
+            $ctx = $Global:CS2BotContext
+            if ($parts.Count -ne 2) {
+                Write-Host "Usage: del <index>"
+                break
+            }
+            $arg = $parts[1].ToLower()
+            if ($arg -eq "all") {
+                $res = Delete-AllTracking -trackedFile $ctx.TrackedFile
+                if ($res.status -eq "ok") {
+                    Write-Host $res.message
+                    $ans = Read-Host "Also clear history.txt? (y/n)"
+                    if ($ans -and $ans.Trim().ToLower() -in @("y", "yes")) {
+                        "" | Set-Content -Path $ctx.HistoryFile -Encoding UTF8
+                        Write-Host "History cleared."
+                    }
+                } else {
+                    Write-Host ("Error: {0}" -f $res.message)
+                }
+            } else {
+                [int]$delIdx = 0
+                if (-not [int]::TryParse($parts[1], [ref]$delIdx)) {
+                    Write-Host "Usage: del <index>"
+                    break
+                }
+                $res = Delete-Tracking -Index $delIdx -trackedFile $ctx.TrackedFile
+                if ($res.status -eq "ok") {
+                    Write-Host $res.message
+                } else {
+                    Write-Host ("Error: {0}" -f $res.message)
+                }
+            }
+            break
         }
 
         default {

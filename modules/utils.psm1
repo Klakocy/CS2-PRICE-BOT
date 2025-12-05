@@ -67,8 +67,15 @@ function Save-Tracked {
         [string]$file,
 
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
         [object[]]$tracked
     )
+
+    # Nadamy kazdej pozycji indeks 1-based przed zapisem, by moc operowac na numerach
+    for ($i = 0; $i -lt $tracked.Count; $i++) {
+        $indexVal = $i + 1
+        $tracked[$i] | Add-Member -MemberType NoteProperty -Name "index" -Value $indexVal -Force
+    }
 
     $json = $tracked | ConvertTo-Json -Depth 5
     Set-Content -Path $file -Value $json -Encoding UTF8
