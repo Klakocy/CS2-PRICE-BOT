@@ -156,7 +156,6 @@ Write-Host "  history"
 Write-Host ""
 Write-Host "Aby wyjsc wpisz: exit lub quit"
 Write-Host ""
-#testbackup
 # Petla glowna
 while ($true) {
     $line = Read-Host "cs2-bot"
