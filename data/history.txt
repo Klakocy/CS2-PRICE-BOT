@@ -1,1 +1,74 @@
 ﻿
+2025-12-06 04:39:35 ; RATE_LIMIT ; Bowie Knife | Autotronic (Minimal Wear) ; HTTP 429 from Steam
+2025-12-06 04:40:04 ; RATE_LIMIT ; AK-47 | Predator (Factory New) ; HTTP 429 from Steam
+2025-12-06 04:41:04 ; RATE_LIMIT ; M4A4 | Faded Zebra (Battle-Scarred) ; HTTP 429 from Steam
+2025-12-06 04:42:09 ; RATE_LIMIT ; AK-47 | Predator (Factory New) ; HTTP 429 from Steam
+2025-12-06 04:43:09 ; RATE_LIMIT ; M4A4 | Faded Zebra (Battle-Scarred) ; HTTP 429 from Steam
+2025-12-06 04:56:34 ; RATE_LIMIT ; AK-47 | Predator (Factory New) ; HTTP 429 from Steam
+2025-12-06 05:16:22 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:16:22 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:23 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:16:23 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:29 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:16:29 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:29 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:16:29 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:35 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:16:35 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:35 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:16:35 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:41 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:16:41 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:41 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:16:41 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:46 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:16:47 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:47 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:16:47 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:51 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:16:51 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:16:52 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:16:52 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:17:20 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:17:20 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:17:20 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:17:20 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:17:26 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:17:26 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:17:27 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:17:27 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:17:32 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:17:32 ; ERROR ; AK-47 | Predator (Factory New) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:17:33 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:17:33 ; ERROR ; M4A4 | Faded Zebra (Battle-Scarred) ; Exception: Unable to index into an object of type System.Management.Automation.PSObject.
+2025-12-06 05:21:13 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:14 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:18 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:19 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:23 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:23 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:30 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:30 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:36 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:37 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:42 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:42 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:47 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:47 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:51 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:52 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:21:58 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:21:58 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:22:04 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:22:04 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:22:09 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:22:09 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:22:14 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:22:15 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:39:41 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:40:35 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:40:35 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:40:40 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:40:41 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2
+2025-12-06 05:40:45 ; OK ; AK-47 | Predator (Factory New) ; Lowest=338.72 PLN
+2025-12-06 05:40:46 ; OK ; M4A4 | Faded Zebra (Battle-Scarred) ; Lowest=17.90 PLN ; Median=15.78 PLN ; Volume=2

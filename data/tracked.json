@@ -1,1 +1,18 @@
-﻿
+﻿[
+    {
+        "weapon":  "AK-47",
+        "skin":  "Predator",
+        "wear":  "Factory New",
+        "interval":  25,
+        "active":  false,
+        "index":  1
+    },
+    {
+        "weapon":  "M4A4",
+        "skin":  "Faded Zebra",
+        "wear":  "Battle-Scarred",
+        "interval":  60,
+        "active":  false,
+        "index":  2
+    }
+]

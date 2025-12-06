@@ -1,0 +1,14 @@
+﻿{
+    "AK-47|Predator|Factory New":  {
+                                       "median":  null,
+                                       "timestamp":  "2025-12-06T05:40:45",
+                                       "volume":  null,
+                                       "lowest":  "338.72"
+                                   },
+    "M4A4|Faded Zebra|Battle-Scarred":  {
+                                            "median":  "15.78",
+                                            "timestamp":  "2025-12-06T05:40:46",
+                                            "volume":  "2",
+                                            "lowest":  "17.90"
+                                        }
+}

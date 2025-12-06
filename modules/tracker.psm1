@@ -21,6 +21,9 @@ function Wear-FromNumber {
 
 function Format-TrackingName {
     param($t)
+    if ([string]::IsNullOrWhiteSpace($t.wear)) {
+        return ("{0} | {1}" -f $t.weapon, $t.skin)
+    }
     return ("{0} | {1} ({2})" -f $t.weapon, $t.skin, $t.wear)
 }
 
@@ -33,8 +36,8 @@ function Add-Tracking {
         [Parameter(Mandatory = $true)]
         [string]$skinQuery,
 
-        [Parameter(Mandatory = $true)]
-        [int]$wearNum,
+        [Parameter(Mandatory = $false)]
+        [int]$wearNum = 0,
 
         [Parameter(Mandatory = $true)]
         [int]$interval,
@@ -44,11 +47,14 @@ function Add-Tracking {
 
         # skinData przekazujemy z main.ps1 – tu go wykorzystamy do poprawy nazwy
         [Parameter(Mandatory = $true)]
-        $skinData
+        $skinData,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$NoWear
     )
 
     $normalizedWeapon = Normalize-WeaponName -weapon $weapon
-    $wearName         = Wear-FromNumber -num $wearNum
+    $wearName         = if ($NoWear) { "" } else { Wear-FromNumber -num $wearNum }
     $skinName         = $skinQuery.Trim()
 
     if ([string]::IsNullOrWhiteSpace($skinName)) {
@@ -58,13 +64,11 @@ function Add-Tracking {
         }
     }
 
-    # --- PROBA NAPRAWY NAZWY SKINA NA KANONICZNA Z BAZY ---
-
+    # Walidacja broni w bazie
     $skinsByWeapon = $skinData.skinsByWeapon
     $weaponKey = $null
 
     if ($skinsByWeapon) {
-        # znajdz klucz broni case-insensitive
         foreach ($k in $skinsByWeapon.Keys) {
             if ($k.Trim().ToLowerInvariant() -eq $normalizedWeapon.Trim().ToLowerInvariant()) {
                 $weaponKey = $k
@@ -72,24 +76,42 @@ function Add-Tracking {
             }
         }
 
+        if (-not $weaponKey) {
+            return @{
+                status  = "error"
+                message = ("Weapon not found in skin list: {0}. Uzyj 'skins <weapon>' aby zobaczyc dostepne skiny." -f $normalizedWeapon)
+            }
+        }
+
         if ($weaponKey) {
             $weaponSkins = $skinsByWeapon[$weaponKey]
             $qLower      = $skinName.Trim().ToLowerInvariant()
 
-            # 1) dokladne dopasowanie case-insensitive
+            # dokladne dopasowanie case-insensitive
             $match = $weaponSkins | Where-Object {
                 $_.skin.Trim().ToLowerInvariant() -eq $qLower
             } | Select-Object -First 1
 
-            # jak nie ma, mozna by zrobic contains, ale na razie zostajemy przy dokladnym
+            # fallback: pojedynczy contains
+            if (-not $match) {
+                $contains = $weaponSkins | Where-Object {
+                    $_.skin.Trim().ToLowerInvariant() -like ("*" + $qLower + "*")
+                }
+                if ($contains.Count -eq 1) {
+                    $match = $contains[0]
+                }
+            }
+
             if ($match) {
-                # popraw nazwe skina na taka jak w bazie
                 $skinName = $match.skin
+            } else {
+                return @{
+                    status  = "error"
+                    message = ("Skin not found for {0}: {1}. Uzyj 'skins {0}'." -f $normalizedWeapon, $skinQuery)
+                }
             }
         }
     }
-
-    # --------------------------------------
 
     # Wczytaj trackingi ZAWSZE jako tablicę
     $tracked = @(Load-Tracked -file $trackedFile)
@@ -200,7 +222,7 @@ function Stop-Tracking {
 
         return @{
             status  = "ok"
-            message = ("Tracking turned OFF for #{0}: {1} | {2} ({3})." -f $Index, $target.weapon, $target.skin, $target.wear)
+            message = ("Tracking turned OFF for #{0}: {1}" -f $Index, (Format-TrackingName $target))
             turnedOff = @($target)
         }
     }
@@ -343,4 +365,85 @@ function Delete-AllTracking {
     }
 }
 
-Export-ModuleMember -Function Wear-FromNumber, Add-Tracking, Stop-Tracking, List-Tracking, Start-AllTracking, Delete-Tracking, Delete-AllTracking, Format-TrackingName
+function Start-TrackingByIndex {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$Index,
+
+        [Parameter(Mandatory = $true)]
+        [string]$trackedFile
+    )
+
+    $tracked = @(Load-Tracked -file $trackedFile)
+    if (-not $tracked -or $tracked.Count -eq 0 -or ($tracked.Count -eq 1 -and $null -eq $tracked[0])) {
+        return @{
+            status  = "error"
+            message = "No entries in tracked.json."
+        }
+    }
+
+    $idx = $Index - 1
+    if ($idx -lt 0 -or $idx -ge $tracked.Count) {
+        return @{
+            status  = "error"
+            message = ("Invalid index: {0}." -f $Index)
+        }
+    }
+
+    $target = $tracked[$idx]
+    $target.active = $true
+    Save-Tracked -file $trackedFile -tracked $tracked
+
+    return @{
+        status  = "ok"
+        message = ("Tracking turned ON for #{0}: {1}" -f $Index, (Format-TrackingName $target))
+        turnedOn = @($target)
+    }
+}
+
+function Set-TrackingInterval {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$Index,
+
+        [Parameter(Mandatory = $true)]
+        [int]$Seconds,
+
+        [Parameter(Mandatory = $true)]
+        [string]$trackedFile
+    )
+
+    if ($Seconds -le 0) { $Seconds = 60 }
+
+    $tracked = @(Load-Tracked -file $trackedFile)
+    if (-not $tracked -or $tracked.Count -eq 0 -or ($tracked.Count -eq 1 -and $null -eq $tracked[0])) {
+        return @{
+            status  = "error"
+            message = "No entries in tracked.json."
+        }
+    }
+
+    $idx = $Index - 1
+    if ($idx -lt 0 -or $idx -ge $tracked.Count) {
+        return @{
+            status  = "error"
+            message = ("Invalid index: {0}." -f $Index)
+        }
+    }
+
+    $target = $tracked[$idx]
+    $target.interval = $Seconds
+    $target.active = $true
+
+    Save-Tracked -file $trackedFile -tracked $tracked
+
+    return @{
+        status  = "ok"
+        message = ("Interval set to {0}s for #{1}: {2}" -f $Seconds, $Index, (Format-TrackingName $target))
+        updated = @($target)
+    }
+}
+
+Export-ModuleMember -Function Wear-FromNumber, Add-Tracking, Stop-Tracking, List-Tracking, Start-AllTracking, Delete-Tracking, Delete-AllTracking, Start-TrackingByIndex, Set-TrackingInterval, Format-TrackingName

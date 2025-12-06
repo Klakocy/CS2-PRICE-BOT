@@ -21,6 +21,59 @@ function Normalize-WeaponName {
         "usps"   = "USP-S"
         "usp-s"  = "USP-S"
         "deagle" = "Desert Eagle"
+
+        # Knives
+        "bowie"         = "Bowie Knife"
+        "bowieknife"    = "Bowie Knife"
+        "bowie-knife"   = "Bowie Knife"
+        "butterfly"     = "Butterfly Knife"
+        "butterflyknife"= "Butterfly Knife"
+        "butterfly-knife"= "Butterfly Knife"
+        "falchion"      = "Falchion Knife"
+        "falchionknife" = "Falchion Knife"
+        "flip"          = "Flip Knife"
+        "flipknife"     = "Flip Knife"
+        "flip-knife"    = "Flip Knife"
+        "gut"           = "Gut Knife"
+        "gutknife"      = "Gut Knife"
+        "gut-knife"     = "Gut Knife"
+        "huntsman"      = "Huntsman Knife"
+        "huntsmanknife" = "Huntsman Knife"
+        "huntsman-knife"= "Huntsman Knife"
+        "karambit"      = "Karambit"
+        "m9"            = "M9 Bayonet"
+        "m9bayonet"     = "M9 Bayonet"
+        "navaja"        = "Navaja Knife"
+        "nomad"         = "Nomad Knife"
+        "paracord"      = "Paracord Knife"
+        "shadow"        = "Shadow Daggers"
+        "shadowdaggers" = "Shadow Daggers"
+        "shadow-daggers"= "Shadow Daggers"
+        "skeleton"      = "Skeleton Knife"
+        "stiletto"      = "Stiletto Knife"
+        "survival"      = "Survival Knife"
+        "talon"         = "Talon Knife"
+        "ursus"         = "Ursus Knife"
+        "classic"       = "Classic Knife"
+        "bayonet"       = "Bayonet"
+
+        # Gloves
+        "bloodhound"      = "Bloodhound Gloves"
+        "driver"          = "Driver Gloves"
+        "handwraps"       = "Hand Wraps"
+        "hand-wraps"      = "Hand Wraps"
+        "hand wraps"      = "Hand Wraps"
+        "hydra"           = "Hydra Gloves"
+        "moto"            = "Moto Gloves"
+        "specialist"      = "Specialist Gloves"
+        "sport"           = "Sport Gloves"
+        "brokenfang"      = "Broken Fang Gloves"
+        "broken-fang"     = "Broken Fang Gloves"
+        "broken fang"     = "Broken Fang Gloves"
+
+        # Agents
+        "agent"  = "Agent"
+        "agents" = "Agent"
     }
 
     $key = $w.ToLower()
@@ -49,6 +102,7 @@ function Load-SkinList {
 
     $skinsByWeapon = @{}
     $allSkins      = @()
+    $baseDir       = Split-Path -Parent $file
 
     foreach ($line in $lines) {
         # Oczekujemy formatu z TABAMI:
@@ -78,6 +132,50 @@ function Load-SkinList {
             $skinsByWeapon[$weapon] = @()
         }
         $skinsByWeapon[$weapon] += $entry
+    }
+
+    # Dodatkowe listy: noze, rekawice, agenci (opcjonalnie jesli pliki istnieja)
+    $extraFiles = @(
+        @{ path = (Join-Path $baseDir "knife_skins.txt");  rarity = "Knife";  collection = "Knife";  introduced = "-" },
+        @{ path = (Join-Path $baseDir "gloves_skins.txt"); rarity = "Gloves"; collection = "Gloves"; introduced = "-" },
+        @{ path = (Join-Path $baseDir "agents_skins.txt"); rarity = "Agent";  collection = "Agent";  introduced = "-" }
+    )
+
+    foreach ($extra in $extraFiles) {
+        $p = $extra.path
+        if (-not (Test-Path $p)) { continue }
+
+        $linesExtra = Get-Content -Path $p -Encoding UTF8 | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+        foreach ($l in $linesExtra) {
+            $weaponExtra = $null
+            $skinExtra   = $null
+
+            if ($p.EndsWith("agents_skins.txt")) {
+                # Format: tylko nazwa agenta
+                $weaponExtra = "Agent"
+                $skinExtra   = $l.Trim()
+            } else {
+                # Format: "Weapon | Skin"
+                $split = $l -split "\|"
+                if ($split.Count -lt 2) { continue }
+                $weaponExtra = $split[0].Trim()
+                $skinExtra   = $split[1].Trim()
+            }
+
+            $entryExtra = [PSCustomObject]@{
+                weapon     = $weaponExtra
+                skin       = $skinExtra
+                rarity     = $extra.rarity
+                collection = $extra.collection
+                introduced = $extra.introduced
+            }
+
+            $allSkins += $entryExtra
+            if (-not $skinsByWeapon.ContainsKey($weaponExtra)) {
+                $skinsByWeapon[$weaponExtra] = @()
+            }
+            $skinsByWeapon[$weaponExtra] += $entryExtra
+        }
     }
 
     return @{

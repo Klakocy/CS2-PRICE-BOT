@@ -41,7 +41,7 @@ function Get-SteamPrice {
         $currencyCode = 6
     }
 
-    $fullName = "$weapon | $skin ($wear)"
+    $fullName = if ([string]::IsNullOrWhiteSpace($wear)) { "$weapon | $skin" } else { "$weapon | $skin ($wear)" }
 
     # Zakoduj nazwę do URL
     $encodedName = [System.Uri]::EscapeDataString($fullName)
@@ -49,7 +49,9 @@ function Get-SteamPrice {
     $url = "https://steamcommunity.com/market/priceoverview/?appid=730&currency=$currencyCode&market_hash_name=$encodedName"
 
     try {
-        $resp = Invoke-RestMethod -Uri $url -Method Get -UseBasicParsing -ErrorAction Stop
+        $resp = Invoke-RestMethod -Uri $url -Method Get -UseBasicParsing -ErrorAction Stop -Headers @{
+            "User-Agent" = "Mozilla/5.0"
+        }
 
         if (-not $resp.success) {
             return $null
@@ -83,6 +85,17 @@ function Get-SteamPrice {
             volume   = $volume
         }
     } catch {
+        # ObsĹ‚uga limitu zapytaĹ„ (429)
+        if ($_.Exception.Response -and $_.Exception.Response.StatusCode.value__ -eq 429) {
+            # Zwroc specjalny status do demona, ĹĽeby wiedzieÄ‡, ĹĽe to rate limit
+            return @{
+                fullName = $fullName
+                lowest   = $null
+                median   = $null
+                volume   = $null
+                rateLimited = $true
+            }
+        }
         return $null
     }
 }

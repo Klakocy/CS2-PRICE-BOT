@@ -71,6 +71,27 @@ function Start-Demon {
     }
 }
 
+function Stop-Demon {
+    $procs = Get-DemonProcess
+    # fallback, gdy Get-CimInstance nie zwroci
+    if (-not $procs -or $procs.Count -eq 0) {
+        try {
+            $procs = Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*demon.ps1*" }
+        } catch { $procs = @() }
+    }
+
+    if ($procs -and $procs.Count -gt 0) {
+        foreach ($p in $procs) {
+            try {
+                Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+            } catch {}
+        }
+        Write-Host "Demon zatrzymany."
+    } else {
+        Write-Host "Demon nie byl uruchomiony."
+    }
+}
+
 # Zaladuj liste skinow
 if (-not (Test-Path $skinListFile)) {
     Write-Host "Brak pliku data\skinlist.txt. Dodaj plik z lista skinow i uruchom ponownie."
@@ -122,6 +143,10 @@ while ($true) {
     }
 
     if ($line -in @("exit", "quit")) {
+        $ans = Read-Host "Zatrzymac demona cen? (y/n)"
+        if ($ans -and $ans.Trim().ToLower() -in @("y","yes")) {
+            Stop-Demon
+        }
         Write-Host "Wylaczanie bota..."
         break
     }
