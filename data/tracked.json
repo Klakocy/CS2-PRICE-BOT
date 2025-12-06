@@ -3,8 +3,8 @@
         "weapon":  "AK-47",
         "skin":  "Predator",
         "wear":  "Factory New",
-        "interval":  25,
-        "active":  false,
+        "interval":  3,
+        "active":  true,
         "index":  1
     },
     {

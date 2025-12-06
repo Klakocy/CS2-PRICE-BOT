@@ -1,0 +1,584 @@
+CS2 PRICE BOT – Specyfikacja projektu B2 (bot + demon + moduły)
+1. Cel projektu
+
+Stworzyć narzędzie konsolowe w PowerShell, które:
+
+sprawdza i śledzi ceny skinów CS2 z Steam Market,
+
+działa w architekturze BOT + DEMON (B2):
+
+BOT = interfejs użytkownika (main.ps1),
+
+DEMON = proces w tle (demon.ps1), który regularnie pobiera ceny,
+
+wykorzystuje pojedynczy plik danych items.txt (TSV) jako źródło wszystkich przedmiotów (bronie, noże, rękawice, agenci),
+
+zapisuje historię cen do history.txt,
+
+trzyma konfigurację śledzonych skinów w tracked.json,
+
+w przyszłości ma być przeniesione do GUI w WPF (.NET) i spakowane do EXE,
+
+potrafi aktualizować lokalny plik items.txt z internetu (serwis https://www.csgodatabase.com/), jeśli jest dostępne połączenie.
+
+2. Wymagania ogólne
+
+Język komunikatów: polski (bez ogonkow w kodzie, żeby uniknąć problemów z encodingiem),
+nazwy skinów: zawsze po angielsku (dokładnie jak na Steam Market).
+
+Kodowanie:
+
+WSZYSTKIE pliki .ps1 i .psm1 mają być zapisane jako UTF-8 (bez BOM).
+
+Kod ma unikać problematycznych znaków:
+
+zamiast „—” używać zwykłego „-”,
+
+w tekstach nie używać znaków „< >” w środku stringów (np. pisać !track weapon skin wear, nie !track <weapon> <skin> <wear>).
+
+Środowisko:
+
+PowerShell uruchamiany z chcp 65001 (UTF-8 jako domyślna code page).
+
+Projekt ma działać na Windows.
+
+Architektura:
+
+pełen podział na:
+
+pliki główne: main.ps1, demon.ps1
+
+moduły: utils.psm1, commands.psm1, skinlist.psm1, search.psm1, prices.psm1, tracker.psm1, updater.psm1
+
+dane: items.txt, tracked.json, history.txt
+
+kod ma być napisany tak, aby można go było później:
+
+przenieść do backendu pod WPF,
+
+wykorzystać te same moduły w aplikacji z GUI.
+
+3. Architektura B2 – BOT + DEMON
+3.1. BOT (main.ps1)
+
+Uruchamiany przez użytkownika.
+
+Odpowiada za:
+
+ładowanie modułów,
+
+opcjonalne wywołanie aktualizacji danych z internetu (funkcja Update-SkinsFromInternet z modułu updater.psm1 – wg ustawień/configu),
+
+ładowanie listy przedmiotów z pliku items.txt przez skinlist.psm1,
+
+automatyczne uruchomienie demona, jeśli jeszcze nie działa,
+
+wyświetlenie powitania i podpowiedzi komend,
+
+pętlę główną, która:
+
+czyta input użytkownika (Read-Host),
+
+przekazuje go do funkcji Handle-Command (z modułu commands.psm1),
+
+obsługuje exit / quit.
+
+3.2. DEMON (demon.ps1)
+
+Osobny proces PowerShell, uruchamiany automatycznie przez main.ps1.
+
+Działa w nieskończonej pętli.
+
+Co „jakiś czas”:
+
+wczytuje listę trackingów z tracked.json,
+
+dla każdej pozycji:
+
+pobiera cenę z API Steama (moduł prices.psm1),
+
+zapisuje wynik do history.txt (moduł utils.psm1),
+
+wybiera minimalny interval spośród aktywnych trackingów i śpi odpowiednią liczbę sekund.
+
+Nie wchodzi w interakcję z użytkownikiem (tylko logi konsolowe).
+
+4. Struktura projektu
+
+Folder bazowy: np. cs2-bot/
+
+Struktura:
+
+main.ps1 – BOT (interfejs tekstowy)
+
+demon.ps1 – DEMON (proces w tle)
+
+modules/
+
+utils.psm1 – funkcje pomocnicze (logi, JSON, proste narzędzia)
+
+commands.psm1 – parser komend (!help, !track, !stop, itp.)
+
+skinlist.psm1 – loader pliku items.txt + struktury danych (indeksy)
+
+search.psm1 – wyszukiwanie i fuzzy search skinów
+
+prices.psm1 – pobieranie cen z API Steama
+
+tracker.psm1 – zarządzanie tracked.json (dodawanie/stop/lista)
+
+updater.psm1 – aktualizacja pliku items.txt z internetu (Update-SkinsFromInternet)
+
+data/
+
+items.txt – lista wszystkich przedmiotów (bronie, noże, rękawice, agenci) w formacie TSV
+
+tracked.json – lista śledzonych skinów
+
+history.txt – historia cen (log tekstowy)
+
+Stare pliki tekstowe skinlist.txt, gloves_skins.txt, knife_skins.txt, agents_skins.txt nie są już używane w nowej wersji specyfikacji.
+
+5. Dane – formaty plików
+5.1. items.txt (główny plik danych)
+
+Cel: Jeden plik opisujący wszystkie typy przedmiotów:
+bronie, noże, rękawice, agenci.
+
+Format jednej linii (TAB jako separator):
+
+Type<TAB>Base<TAB>Skin<TAB>Rarity<TAB>Collection<TAB>Introduced
+
+Kolumny:
+
+Type – typ przedmiotu:
+
+weapon – zwykłe bronie (AK-47, M4A1-S itd.)
+
+knife – noże (Butterfly Knife, Karambit itd.)
+
+glove – rękawice (Sport Gloves itd.)
+
+agent – agenci
+
+Base – „baza” / model:
+
+dla weapon: np. AK-47, M4A1-S
+
+dla knife: np. Butterfly Knife
+
+dla glove: np. Sport Gloves
+
+dla agent: np. Agent (stała wartość, bo właściwa nazwa jest w Skin)
+
+Skin – nazwa skina/modelu/agenta:
+
+weapon: np. Predator, Redline
+
+knife: np. Fade, Tiger Tooth
+
+glove: np. Vice, Omega
+
+agent: np. Sir Bloody Loudmouth Darryl
+
+Rarity / Collection / Introduced:
+
+dla broni – normalnie uzupełnione (jak w starej specyfikacji),
+
+dla noży/rękawic/agentów mogą być -, jeśli nie zbieramy tych danych.
+
+Przykłady linii:
+
+weapon	AK-47	Predator	        Industrial	The Dust Collection	    14 August 2013
+knife	Butterfly Knife	Fade	        -	        -	                    -
+glove	Sport Gloves	Vice	        -	        -	                    -
+agent	Agent	Sir Bloody Loudmouth Darryl	-	-	                    -
+
+
+Moduł skinlist.psm1 ma:
+
+wczytać ten plik,
+
+zbudować strukturę hybrydową z indeksami:
+
+@{
+  weaponsByWeapon = @{
+    "AK-47" = @(
+      @{ type="weapon"; base="AK-47"; skin="Predator"; rarity="Industrial"; collection="The Dust Collection"; introduced="14 August 2013" }
+      ...
+    )
+    "P90" = @(
+      ...
+    )
+  }
+  weaponsAll = @(
+    @{ type="weapon"; base="AK-47"; skin="Predator"; ... }
+    @{ type="weapon"; base="P90"; skin="Death by Kitty"; ... }
+    ...
+  )
+
+  knivesByModel = @{
+    "Butterfly Knife" = @(
+      @{ type="knife"; base="Butterfly Knife"; skin="Fade"; ... }
+      ...
+    )
+  }
+  knivesAll = @(
+    @{ type="knife"; base="Butterfly Knife"; skin="Fade"; ... }
+    ...
+  )
+
+  glovesByModel = @{
+    "Sport Gloves" = @(
+      @{ type="glove"; base="Sport Gloves"; skin="Vice"; ... }
+      ...
+    )
+  }
+  glovesAll = @(
+    @{ type="glove"; base="Sport Gloves"; skin="Vice"; ... }
+    ...
+  )
+
+  agentsAll = @(
+    @{ type="agent"; base="Agent"; skin="Sir Bloody Loudmouth Darryl"; ... }
+    ...
+  )
+}
+
+
+Nazwy broni / modeli mają być normalizowane (np. ak47 → AK-47, m4a1s → M4A1-S).
+
+5.2. tracked.json
+
+(bez zmian logiki, tylko dane biorą się pośrednio z items.txt)
+
+Lista obiektów, każdy opisuje jeden monitoring:
+
+[
+  {
+    "weapon": "AK-47",
+    "skin": "Redline",
+    "wear": "Field-Tested",
+    "interval": 30,
+    "active": true
+  }
+]
+
+
+Moduł tracker.psm1:
+
+wczytuje ten plik,
+
+dodaje / aktualizuje wpisy,
+
+ustawia active = true/false,
+
+zapisuje JSON z powrotem w UTF-8.
+
+5.3. history.txt
+
+(jak wcześniej)
+
+Zwykły plik tekstowy, UTF-8.
+
+Każda linia: timestamp + status + nazwa skina + szczegóły.
+
+Przykład:
+
+2025-12-05 18:21:10 ; OK ; AK-47 | Redline (Field-Tested) ; Najnizsza=23.40zl ; Mediana=22.95zl ; Volume=560
+
+
+Funkcja Write-History (w utils.psm1) ma odpowiadać za dopisywanie w jednolitym formacie.
+
+6. Moduły – odpowiedzialności
+6.1. utils.psm1
+
+Funkcje:
+
+Write-History($historyFile, $status, $fullName, $message) – dopisuje linię do historii.
+
+Load-Tracked($file) – wczytuje tracked.json (lub zwraca pustą listę).
+
+Save-Tracked($file, $tracked) – zapisuje tracked.json.
+
+Wszystko w UTF-8.
+
+6.2. skinlist.psm1
+
+Funkcje:
+
+Normalize-WeaponName($weapon) – np. ak47 → AK-47.
+(można rozszerzyć/analogicznie dla modeli noży/rękawic, jeśli potrzebne).
+
+Load-ItemList($file) – nowa główna funkcja loadera:
+
+wczytuje items.txt (TSV),
+
+rozpoznaje Type (weapon/knife/glove/agent),
+
+buduje i zwraca strukturę:
+
+@{
+  weaponsByWeapon = ...
+  weaponsAll      = ...
+  knivesByModel   = ...
+  knivesAll       = ...
+  glovesByModel   = ...
+  glovesAll       = ...
+  agentsAll       = ...
+}
+
+
+Ten moduł jest źródłem prawdy o liście przedmiotów w pamięci – reszta programu dostaje już gotowe indeksy.
+
+6.3. search.psm1
+
+Funkcje:
+
+Find-SkinsByWeapon($weapon, $weaponsByWeapon) – lista skinów dla danej broni (weapon).
+
+(opcjonalnie w przyszłości) analogiczne funkcje dla noży/rękawic.
+
+Resolve-SkinName($weapon, $skinQuery, $weaponsByWeapon, $weaponsAll):
+
+próbuje znaleźć dopasowanie:
+
+najpierw dokładne,
+
+potem częściowe (fuzzy, -like "*tekst*"),
+
+zwraca:
+
+sukces + jeden wynik,
+
+albo błąd + lista wielu dopasowań,
+
+albo błąd: nic nie znaleziono.
+
+6.4. prices.psm1
+
+Funkcje:
+
+Get-WearName([int]$num) – mapowanie 1–5 → "Factory New" itd.
+
+Get-SteamPrice($weapon, $skin, $wear, $currency = "PLN"):
+
+składa pełną nazwę: "AK-47 | Redline (Field-Tested)",
+
+koduje ją do URL,
+
+wywołuje API:
+
+https://steamcommunity.com/market/priceoverview/?appid=730&currency=6&market_hash_name=...
+
+zwraca hashtable:
+
+fullName
+
+lowest
+
+median
+
+volume
+
+albo $null, jeśli nie udało się pobrać.
+
+6.5. tracker.psm1
+
+Funkcje:
+
+Wear-FromNumber($num) – 1–5 → nazwa jakości.
+
+Add-Tracking(...):
+
+normalizuje broń (przy użyciu Normalize-WeaponName),
+
+rozwiązuje nazwę skina (Resolve-SkinName),
+
+jeśli kilka dopasowań → zwraca multi i komunikat dla użytkownika,
+
+jeśli 1 dopasowanie → dodaje/aktualizuje wpis w tracked.json.
+
+Stop-Tracking(...):
+
+skin = "all" → ustawia wszystkie active = false,
+
+inaczej – wyłącza konkretny wpis.
+
+List-Tracking($trackedFile) – zwraca listę trackingów.
+
+6.6. commands.psm1
+
+Funkcja główna: Handle-Command($input).
+
+Rozpoznaje komendy:
+
+!help – wypisuje listę komend.
+
+!skins weapon – wypisuje listę skinów dla broni.
+
+!track weapon skin wear [seconds]
+
+!stop weapon skin wear
+
+!stop all
+
+!list – wypisuje aktualne trackingi.
+
+!history – pokazuje np. ostatnie 10 wpisów history.txt.
+
+(opcjonalnie) komenda typu !update – ręczne wywołanie Update-SkinsFromInternet.
+
+Wykorzystuje:
+
+tracker.psm1 do operacji na tracked.json,
+
+skinlist.psm1 i search.psm1 do dopasowywania skinów,
+
+utils.psm1 do historii,
+
+updater.psm1 do ręcznej aktualizacji danych (jeśli taka komenda zostanie dodana).
+
+6.7. updater.psm1 – aktualizacja z internetu
+
+Główna funkcja: Update-SkinsFromInternet($itemsFilePath).
+
+Zadania funkcji:
+
+Sprawdzić, czy jest połączenie z internetem (np. prosty request testowy lub obsługa błędu przy pobieraniu).
+
+Pobrać dane z https://www.csgodatabase.com/
+(np. Invoke-WebRequest / Invoke-RestMethod – w zależności od tego, jak da się wygodnie wyciągnąć listę przedmiotów).
+
+Sparsować odpowiedź (HTML/JSON – w zależności od formatu serwisu).
+
+Zbudować listę przedmiotów zgodną z formatem items.txt:
+
+kolumny: Type, Base, Skin, Rarity, Collection, Introduced,
+
+zachować spójność nazw z tym, co jest używane do budowania market_hash_name.
+
+Nadpisać lub zaktualizować lokalny plik items.txt:
+
+najprostszy wariant: nadpisanie całego pliku nową listą.
+
+Zwrócić informację o sukcesie / błędach:
+
+komunikat tekstowy dla konsoli/GUI,
+
+ew. zwrócić true/false albo status + wiadomość.
+
+Założenia:
+
+Program cały czas korzysta z jednego źródła prawdy: lokalnego pliku items.txt.
+
+Loader w skinlist.psm1 pozostaje taki sam – korzysta tylko z pliku.
+
+Różnica jest tylko taka, że przed wczytaniem danych można (lub trzeba – wg ustawień) wywołać Update-SkinsFromInternet, aby odświeżyć items.txt.
+
+main.ps1 może:
+
+wywołać Update-SkinsFromInternet przy starcie (jeśli config na to pozwala),
+
+oraz udostępnić użytkownikowi komendę ręcznej aktualizacji (np. !update).
+
+7. Zachowanie BOTA i DEMONA
+7.1. Start bota (main.ps1)
+
+Importuje moduły.
+
+Opcjonalnie (jeśli w configu włączone):
+
+wywołuje Update-SkinsFromInternet z updater.psm1,
+
+obsługuje ew. błąd (brak internetu itp. – wtedy używa istniejącego items.txt).
+
+Ładuje items.txt przez Load-ItemList z skinlist.psm1.
+
+Sprawdza, czy demon.ps1 już działa:
+
+jeśli nie → uruchamia go przez Start-Process.
+
+Wypisuje powitanie i opis komend.
+
+Wchodzi w pętlę:
+
+czyta użytkownika (Read-Host),
+
+exit / quit → wychodzi,
+
+inne → Handle-Command.
+
+7.2. Komendy (przykłady)
+
+!skins ak47
+
+pokazuje wszystkie skiny broni AK-47 (z indeksu weaponsByWeapon wczytanego z items.txt).
+
+!track ak47 redline 3
+
+3 → Field-Tested,
+
+dopasowuje skina Redline,
+
+dodaje wpis do tracked.json,
+
+demon zaczyna go śledzić.
+
+!stop ak47 redline 3
+
+ustawia active = false dla tego wpisu.
+
+!stop all
+
+wyłącza wszystkie trackingi.
+
+!history
+
+wypisuje kilka ostatnich linii z history.txt.
+
+(opcjonalnie) !update
+
+wywołuje Update-SkinsFromInternet,
+
+po udanej aktualizacji może przeładować items.txt.
+
+7.3. Demon (demon.psm1)
+
+Pętla:
+
+wczytuje tracked.json,
+
+dla każdego active = true:
+
+pobiera cenę z Get-SteamPrice,
+
+jeśli dane są → zapisuje do history.txt,
+
+śpi przez minimalny interval spośród aktywnych.
+
+8. Przyszłe rozszerzenia
+
+Projekt ma być łatwy do rozbudowy o:
+
+GUI w WPF (.NET) – docelowo:
+
+backend wykorzystuje te same moduły (skinlist, search, prices, tracker, updater),
+
+WPF zajmuje się rysowaniem UI (listy, przyciski, wykresy, itp.).
+
+Nowe komendy:
+
+!compare – porównywanie cen z różnych dat,
+
+!graph – generowanie danych do wykresów,
+
+!notify – alerty przy określonym progu ceny,
+
+integracja z Discord Webhook.
+
+EXE:
+
+spakowanie wszystkiego jako aplikacja .NET + WPF,
+
+logiczne moduły (tracker, search, prices, updater, itp.) pozostają bez zmian.

@@ -14,6 +14,7 @@ $skinListFile = Join-Path $dataPath  "skinlist.txt"
 $trackedFile  = Join-Path $dataPath  "tracked.json"
 $historyFile  = Join-Path $dataPath  "history.txt"
 $demonScript  = Join-Path $scriptRoot "demon.ps1"
+$demonPidFile = Join-Path $dataPath   "demon.pid"
 
 # Upewnij sie, ze katalog data istnieje
 if (-not (Test-Path $dataPath)) {
@@ -64,7 +65,10 @@ function Start-Demon {
     )
 
     try {
-        Start-Process powershell -ArgumentList $psiArgs -WindowStyle Minimized | Out-Null
+        $p = Start-Process powershell -ArgumentList $psiArgs -WindowStyle Minimized -PassThru
+        if ($p -and $p.Id) {
+            try { $p.Id | Out-File -FilePath $demonPidFile -Encoding ASCII -Force } catch {}
+        }
         Write-Host "Demon zostal uruchomiony."
     } catch {
         Write-Host "Blad podczas uruchamiania demona: $($_.Exception.Message)"
@@ -72,8 +76,23 @@ function Start-Demon {
 }
 
 function Stop-Demon {
+    $killed = $false
+
+    # najpierw PID z pliku
+    if (Test-Path $demonPidFile) {
+        $pidText = Get-Content -Path $demonPidFile -ErrorAction SilentlyContinue | Select-Object -First 1
+        [int]$pidVal = 0
+        if ($pidText -and [int]::TryParse($pidText, [ref]$pidVal)) {
+            try {
+                Stop-Process -Id $pidVal -Force -ErrorAction SilentlyContinue
+                $killed = $true
+            } catch {}
+        }
+        Remove-Item -Path $demonPidFile -ErrorAction SilentlyContinue
+    }
+
+    # fallback wykrycie po commandline
     $procs = Get-DemonProcess
-    # fallback, gdy Get-CimInstance nie zwroci
     if (-not $procs -or $procs.Count -eq 0) {
         try {
             $procs = Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*demon.ps1*" }
@@ -84,8 +103,12 @@ function Stop-Demon {
         foreach ($p in $procs) {
             try {
                 Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+                $killed = $true
             } catch {}
         }
+    }
+
+    if ($killed) {
         Write-Host "Demon zatrzymany."
     } else {
         Write-Host "Demon nie byl uruchomiony."
@@ -133,7 +156,7 @@ Write-Host "  history"
 Write-Host ""
 Write-Host "Aby wyjsc wpisz: exit lub quit"
 Write-Host ""
-
+#testbackup
 # Petla glowna
 while ($true) {
     $line = Read-Host "cs2-bot"
